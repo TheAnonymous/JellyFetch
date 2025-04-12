@@ -9,11 +9,11 @@
         "versions": [
             {
                 "version": "1.0.0.0",
-                "changelog": "Initial release.\n- Added ability to download videos using yt-dlp.\n- Provides a web interface for submitting URLs.\n- Configurable download path.\n- Uses Jellyfin's API Key authentication.", // Kurze Zusammenfassung der Änderungen
+                "changelog": "Initial release.\n- Added ability to download videos using yt-dlp.\n- Provides a web interface for submitting URLs.\n- Configurable download path.\n- Uses Jellyfin's API Key authentication.",
                 "targetAbi": "10.10.0.0",
                 "sourceUrl": "https://github.com/TheAnonymous/JellyFetch/releases/download/1.0.0/Jellyfin.Plugin.JellyFetch.zip",
                 "checksum": "d41d8cd98f00b204e9800998ecf8427e",
-                "timestamp": "2024-04-12T12:00:00Z"
+                "timestamp": "2025-04-12T12:00:00Z"
             }
         ]
     }
