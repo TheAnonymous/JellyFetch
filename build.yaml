@@ -1,7 +1,7 @@
 ---
-name: "Template"
-guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
-version: "1.0.0.0"
+name: "JellyFetch"
+guid: "a8ea81c2-b9a1-499e-ac3d-d9e7a780f6fa"
+version: "10.10.0."
 targetAbi: "10.9.0.0"
 framework: "net8.0"
 overview: "Short description about your plugin"
@@ -11,6 +11,6 @@ description: >
 category: "General"
 owner: "jellyfin"
 artifacts:
-- "Jellyfin.Plugin.Template.dll"
+- "Jellyfin.Plugin.JellyFetch.dll"
 changelog: >
   changelog

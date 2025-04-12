@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>JellyFetch Configuration</title>
+    <style>
+        /* Optional: Minor style adjustments if needed */
+        .configSection {
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #444;
+        }
+        .configSection:last-child {
+            border-bottom: none;
+        }
+        .infoText p, .infoText li {
+            color: #ccc; /* Lighter text for descriptions */
+            line-height: 1.5;
+        }
+        .infoText code {
+            background-color: #333;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+        .infoText a {
+            color: #00a4dc;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="jellyfetchConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button">
+
+    <div data-role="content">
+        <div class="content-primary">
+            <h1>JellyFetch Configuration</h1>
+
+            <section class="configSection infoText">
+                <h2>Submit URLs</h2>
+                <p>Use the following page to submit new video URLs for download:</p>
+                <a href="/Plugins/JellyFetch/SubmitPage" target="_blank" style="text-decoration: underline; color: #00a4dc; display: inline-block; margin-bottom: 1em;">
+                    Open URL Submission Page (New Tab)
+                </a>
+                <div class="fieldDescription">
+                    Note: This submission page requires a valid Jellyfin API Key for authentication. Downloads are processed in the background.
+                </div>
+                <h3>Download Behavior</h3>
+                <p>
+                    Submitting multiple URLs in quick succession will initiate parallel downloads. Each download runs as a separate <code>yt-dlp</code> process. Be mindful that this can consume significant server resources (CPU, RAM, network bandwidth) and might lead to throttling from the video source website. There is currently no queueing mechanism to limit concurrent downloads.
+                </p>
+            </section>
+
+            <section class="configSection">
+                <h2>Settings</h2>
+                <form id="jellyfetchConfigForm">
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="downloadPath">Download Directory:</label>
+                        <input type="text" id="downloadPath" name="downloadPath" is="emby-input" required="required" />
+                        <div class="fieldDescription">
+                            Specify the directory where downloaded videos should be saved. The Jellyfin server process requires write permissions to this path. This directory should ideally be part of a Jellyfin library for automatic media discovery.
+                        </div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="ytDlpPath">Path to yt-dlp:</label>
+                        <input type="text" id="ytDlpPath" name="ytDlpPath" is="emby-input" required="required" />
+                        <div class="fieldDescription">
+                            Full path to the <code>yt-dlp</code> executable, or just <code>yt-dlp</code> if it's available in the system's PATH environment variable.
+                        </div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block">
+                            <span>Save</span>
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+
+            <section class="configSection infoText">
+                <h2>About yt-dlp</h2>
+                <p>
+                    This plugin utilizes the powerful command-line tool <a href="https://github.com/yt-dlp/yt-dlp" target="_blank"><code>yt-dlp</code></a> to handle the actual downloading of videos from various websites. <code>yt-dlp</code> is a fork of the popular youtube-dl project with additional features and fixes.
+                </p>
+                <p>
+                    You must have <code>yt-dlp</code> installed on the same machine where your Jellyfin server is running for this plugin to function correctly. It's also highly recommended to install <code>ffmpeg</code>, as <code>yt-dlp</code> uses it for merging video and audio formats.
+                </p>
+                <p>
+                    For a list of the numerous websites supported by <code>yt-dlp</code>, see the official documentation:
+                    <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank">Supported Sites List</a>.
+                </p>
+                <h3>Installation Recommendation (Windows)</h3>
+                <p>
+                    On Windows, a convenient way to install and manage both <code>yt-dlp</code> and <code>ffmpeg</code> is by using the package manager <a href="https://chocolatey.org/" target="_blank">Chocolatey</a>. Open PowerShell as Administrator and run:
+                </p>
+                <p>
+                    <code>choco install yt-dlp ffmpeg</code>
+                </p>
+                <p>
+                    Ensure that the installed location for <code>yt-dlp.exe</code> is either in your system's PATH or that you specify the full path in the settings field above.
+                </p>
+            </section>
+
+        </div> </div> <script type="text/javascript">
+    /**
+     * Configuration specific to the JellyFetch plugin page.
+     */
+    const JellyFetchConfig = {
+        pluginUniqueId: 'a8ea81c2-b9a1-499e-ac3d-d9e7a780f6fa' // This plugin's unique identifier
+    };
+
+    /**
+     * Handles loading the plugin configuration when the page is shown.
+     * @param {Event} event - The pageshow event.
+     */
+    async function loadConfiguration(event) {
+        const page = event.target; // The page element (#jellyfetchConfigPage)
+        Dashboard.showLoadingMsg();
+
+        try {
+            const config = await ApiClient.getPluginConfiguration(JellyFetchConfig.pluginUniqueId);
+
+            // Populate form fields, providing default values if config is empty
+            page.querySelector('#downloadPath').value = config.DownloadPath || '/media/jellyfetch_downloads';
+            page.querySelector('#ytDlpPath').value = config.YtDlpPath || 'yt-dlp';
+
+        } catch (error) {
+            console.error("Error loading JellyFetch configuration:", error);
+            Dashboard.alert({
+                title: 'Error Loading Configuration',
+                text: 'Failed to load JellyFetch settings. Please try again later or check server logs. Details: ' + error
+            });
+        } finally {
+            Dashboard.hideLoadingMsg();
+        }
+    }
+
+    /**
+     * Handles saving the plugin configuration when the form is submitted.
+     * @param {Event} event - The form submit event.
+     */
+    async function saveConfiguration(event) {
+        event.preventDefault(); // Prevent default form submission
+        const form = event.target; // The form element (#jellyfetchConfigForm)
+        Dashboard.showLoadingMsg();
+
+        try {
+            // Get the current configuration object first
+            const config = await ApiClient.getPluginConfiguration(JellyFetchConfig.pluginUniqueId);
+
+            // Update configuration object with values from the form
+            config.DownloadPath = form.querySelector('#downloadPath').value;
+            config.YtDlpPath = form.querySelector('#ytDlpPath').value;
+
+            // Send the updated configuration back to the server
+            const result = await ApiClient.updatePluginConfiguration(JellyFetchConfig.pluginUniqueId, config);
+            Dashboard.processPluginConfigurationUpdateResult(result); // Use standard Jellyfin result processing
+
+        } catch (error) {
+            console.error("Error saving JellyFetch configuration:", error);
+            Dashboard.alert({
+                title: 'Error Saving Configuration',
+                text: 'Failed to save JellyFetch settings. Please try again later or check server logs. Details: ' + error
+            });
+        } finally {
+            Dashboard.hideLoadingMsg();
+        }
+
+        return false; // Prevent native form submission
+    }
+
+    // Attach event listeners once the DOM is ready (or via pageshow)
+    document.addEventListener('pageshow', (event) => {
+        // Ensure this runs only for our specific page div
+        if (event.target.id === 'jellyfetchConfigPage') {
+            loadConfiguration(event);
+
+            // Add submit listener if not already added (or ensure pageshow fires only once per load)
+            const form = event.target.querySelector('#jellyfetchConfigForm');
+            // Check if listener exists might be complex, attaching here assumes pageshow setup
+            if (!form.dataset.submitListenerAttached) {
+                form.addEventListener('submit', saveConfiguration);
+                form.dataset.submitListenerAttached = 'true'; // Mark listener as attached
+            }
+        }
+    });
+
+</script>
+
+</div> </body>
+</html>

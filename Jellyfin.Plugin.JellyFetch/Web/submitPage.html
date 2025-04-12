@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JellyFetch - Submit URL</title>
+    <style>
+        /* Basic styling for readability and consistency */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 600px;
+            margin: 2em auto;
+            padding: 1.5em;
+            background-color: #f8f9fa; /* Lighter background */
+            color: #212529; /* Darker text */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #005580; /* Slightly darker blue */
+            text-align: center;
+            margin-bottom: 1.5em;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+            font-weight: 500;
+        }
+        input[type="url"], input[type="password"] {
+            display: block;
+            width: 100%;
+            padding: 0.8em;
+            margin-bottom: 1em;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5em;
+            vertical-align: middle;
+        }
+        label[for="storeKey"] {
+            display: inline;
+            font-weight: normal;
+            font-size: 0.9em;
+            color: #495057;
+        }
+        .key-storage-warning {
+            font-size: 0.8em;
+            color: #6c757d; /* Subtler warning color */
+            margin-top: 0.3em;
+            margin-bottom: 1.2em;
+            display: block;
+            line-height: 1.4;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.9em;
+            background-color: #007bff; /* Standard primary blue */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.05em;
+            transition: background-color 0.2s ease;
+            margin-top: 1.5em;
+        }
+        button:hover, button:focus {
+            background-color: #0056b3;
+            outline: none;
+        }
+        button:active {
+            background-color: #004085;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        #messageArea {
+            margin-top: 1.5em;
+            padding: 1em;
+            border-radius: 4px;
+            font-size: 0.95em;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .success {
+            background-color: #d4edda; /* Bootstrap success background */
+            border: 1px solid #c3e6cb;
+            color: #155724; /* Bootstrap success text */
+        }
+        .error {
+            background-color: #f8d7da; /* Bootstrap danger background */
+            border: 1px solid #f5c6cb;
+            color: #721c24; /* Bootstrap danger text */
+        }
+        .info {
+            background-color: #e2e3e5;
+            border: 1px solid #d6d8db;
+            color: #383d41;
+        }
+        .info-section {
+            margin-top: 2em;
+            padding-top: 1em;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.9em;
+            color: #495057;
+        }
+        .info-section p {
+            margin-bottom: 0.5em;
+        }
+        .info-section a {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1>JellyFetch Video Download</h1>
+
+<form id="downloadForm">
+    <label for="videoUrl">Video URL:</label>
+    <input type="url" id="videoUrl" placeholder="https://example.com/video" required>
+
+    <label for="apiKey">Jellyfin API Key:</label>
+    <input type="password" id="apiKey" placeholder="Your Jellyfin API Key" required>
+
+    <div>
+        <input type="checkbox" id="storeKey">
+        <label for="storeKey">Remember API Key in browser</label>
+        <span class="key-storage-warning">Note: Storing the API key in the browser is insecure! Only use this if you trust this device.</span>
+    </div>
+
+    <button type="submit" id="submitBtn">Start Download</button>
+</form>
+
+<div id="messageArea" style="display: none;"></div>
+
+<div class="info-section">
+    <p>
+        This tool uses yt-dlp to download videos. Check the list of supported sites:
+        <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" rel="noopener noreferrer">yt-dlp Supported Sites</a>.
+    </p>
+    <p>
+        If you encounter issues or downloads do not appear, please check the main Jellyfin server logs for errors related to "JellyFetch" or "yt-dlp".
+    </p>
+</div>
+
+<script>
+    // --- DOM Element References ---
+    const form = document.getElementById('downloadForm');
+    const videoUrlInput = document.getElementById('videoUrl');
+    const apiKeyInput = document.getElementById('apiKey');
+    const storeKeyCheckbox = document.getElementById('storeKey');
+    const messageArea = document.getElementById('messageArea');
+    const submitBtn = document.getElementById('submitBtn');
+    const storageKey = 'jellyfetchApiKey'; // Unique key for localStorage
+
+    /**
+     * Displays feedback messages to the user.
+     * @param {string} text - The message text.
+     * @param {'success'|'error'|'info'} type - The type of message for styling.
+     */
+    function displayMessage(text, type = 'info') {
+        messageArea.textContent = text;
+        messageArea.className = `message ${type}`; // Apply class for styling
+        messageArea.style.display = 'block';
+    }
+
+    /**
+     * Loads the API key from localStorage on page initialization.
+     */
+    function loadApiKey() {
+        try {
+            const storedData = localStorage.getItem(storageKey);
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                // Only populate if the user chose to remember
+                if (data && data.remember) {
+                    apiKeyInput.value = data.key || '';
+                    storeKeyCheckbox.checked = true;
+                }
+            }
+        } catch (e) {
+            console.error("Could not load API Key from localStorage:", e);
+            // Clear potentially corrupted data
+            localStorage.removeItem(storageKey);
+        }
+    }
+
+    /**
+     * Handles the form submission event.
+     * @param {Event} event - The submit event.
+     */
+    async function handleFormSubmit(event) {
+        event.preventDefault(); // Prevent default form submission
+        submitBtn.disabled = true;
+        displayMessage('Sending request...', 'info');
+
+        const videoUrl = videoUrlInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
+        const rememberKey = storeKeyCheckbox.checked;
+
+        // --- Handle API Key Storage ---
+        try {
+            const dataToStore = { key: rememberKey ? apiKey : '', remember: rememberKey };
+            localStorage.setItem(storageKey, JSON.stringify(dataToStore));
+        } catch (e) {
+            console.error("Error saving API Key to localStorage:", e);
+            // Optionally notify user: displayMessage('Could not save API key preference.', 'error');
+        }
+
+        // --- API Call to Jellyfin Plugin ---
+        const downloadEndpoint = '/Plugins/JellyFetch/Download'; // Backend endpoint relative path
+
+        try {
+            const response = await fetch(downloadEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Emby-Token': apiKey // Standard Jellyfin authentication header
+                },
+                body: JSON.stringify({ Url: videoUrl }) // Send URL in the request body
+            });
+
+            if (response.ok) {
+                // Successful request initiation (e.g., HTTP 204 No Content from backend)
+                displayMessage('Download request sent successfully!', 'success');
+                videoUrlInput.value = ''; // Clear URL field on success
+            } else {
+                // Handle server-side errors (e.g., 401 Unauthorized, 400 Bad Request, 503 Service Unavailable)
+                let errorText = `Error ${response.status}: ${response.statusText}`;
+                try {
+                    // Attempt to get more specific error message from the server response body
+                    const errorData = await response.text();
+                    if (errorData) {
+                        // Avoid showing full HTML pages as error messages
+                        if (!errorData.trim().startsWith('<') && errorData.length < 200) {
+                            errorText = `Error ${response.status}: ${errorData}`;
+                        }
+                    }
+                } catch (e) { /* Ignore errors reading the error response body */ }
+                console.error('Server error response:', errorText);
+                displayMessage(errorText, 'error');
+            }
+        } catch (error) {
+            // Handle network errors or other JavaScript exceptions during fetch
+            console.error('Network or JavaScript error:', error);
+            displayMessage(`Network error: ${error.message}. Ensure Jellyfin is reachable.`, 'error');
+        } finally {
+            submitBtn.disabled = false; // Re-enable button after request completes or fails
+        }
+    }
+
+    // --- Initialization ---
+    // Load stored API key when the page loads
+    loadApiKey();
+    // Attach the submit handler to the form
+    form.addEventListener('submit', handleFormSubmit);
+
+</script>
+
+</body>
+</html>
