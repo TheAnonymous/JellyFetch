@@ -110,3 +110,9 @@ This project is licensed under the [GPL3] License - see the [LICENSE](LICENSE) f
 
 * This plugin heavily relies on the fantastic work of the [yt-dlp team](https://github.com/yt-dlp/yt-dlp).
 * The Jellyfin team and community.
+
+<!-- github-cicd-policy -->
+## Local validation policy
+
+This repository does not use GitHub Actions or any other GitHub-hosted CI/CD. Run tests, linters, builds, and all other checks locally before merging. A documented successful local test run is sufficient for review and merge.
+<!-- /github-cicd-policy -->
