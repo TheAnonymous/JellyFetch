@@ -2,7 +2,7 @@
 
 
 [![Latest Release](https://img.shields.io/github/v/release/TheAnonymous/JellyFetch)](https://github.com/TheAnonymous/JellyFetch/releases/latest)
-[![License](PLACEHOLDER_URL_LICENSE_BADGE)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 JellyFetch is a plugin for the Jellyfin media server that allows you to easily download videos from various web sources directly into your library using the powerful `yt-dlp` command-line tool.
 
@@ -46,7 +46,7 @@ There are two methods to install the JellyFetch plugin:
     ```
     [https://raw.githubusercontent.com/TheAnonymous/JellyFetch/main/manifest.json](https://raw.githubusercontent.com/TheAnonymous/JellyFetch/main/manifest.json)
     ```
-    *(Note: Using the `main` branch URL directly means you always get the latest commit's manifest, which might not correspond to a stable release. Ideally, link to a manifest associated with a specific release tag).*
+    *(Note: Using the main branch URL directly means you always get the latest commit's manifest. This is convenient for testing but might not correspond to a stable release and could be unstable. For stable use, it's best to use a manifest URL associated with a specific release tag once available.)*
 4.  Click "Save".
 5.  Find "JellyFetch" in the catalog list.
 6.  Click on it and select the desired version to install.

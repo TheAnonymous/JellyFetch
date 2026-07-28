@@ -1,16 +1,15 @@
 ---
 name: "JellyFetch"
 guid: "a8ea81c2-b9a1-499e-ac3d-d9e7a780f6fa"
-version: "10.10.0."
-targetAbi: "10.9.0.0"
+# version line removed
+targetAbi: "10.9.0.0" # Ensured this is correct
 framework: "net8.0"
-overview: "Short description about your plugin"
+overview: "Downloads web videos using yt-dlp via a simple web interface."
 description: >
-  This is a longer description that can span more than one
-  line and include details about your plugin.
-category: "General"
-owner: "jellyfin"
+  JellyFetch is a Jellyfin plugin that allows you to easily download videos from various websites using the powerful yt-dlp command-line tool. It provides a user-friendly web interface for submitting video URLs, and integrates the downloads seamlessly into your Jellyfin library.
+category: "Tools"
+owner: "TheAnonymous"
 artifacts:
 - "Jellyfin.Plugin.JellyFetch.dll"
 changelog: >
-  changelog
+  See CHANGELOG.md
